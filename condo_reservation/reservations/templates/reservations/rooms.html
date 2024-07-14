@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Available Rooms</title>
+</head>
+<body>
+    <h1>Available Rooms</h1>
+    <ul>
+        {% for room in rooms %}
+            <li>{{ room.type }} on floor {{ room.floor }} - ${{ room.price }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'home' %}">Back</a>
+</body>
+</html>

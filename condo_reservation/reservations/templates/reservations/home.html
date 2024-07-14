@@ -1,0 +1,99 @@
+<!-- reservations/templates/reservations/home.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome to YO MAMA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .filter-container {
+            margin: 20px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(5, 100px);
+            gap: 10px;
+            margin: 20px;
+        }
+        .room {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .available {
+            background-color: green;
+        }
+        .unavailable {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to [CONDO NAME]</h1>
+    <a href="{% url 'register' %}">Create Account</a>
+    <a href="{% url 'login' %}">Log In</a>
+    
+    <div class="filter-container">
+        <form action="{% url 'filter_rooms' %}" method="get">
+            <label for="type">Room Type:</label>
+            <select name="type" id="type">
+                <option value="">All</option>
+                <option value="studio">Studio</option>
+                <option value="1-bed">1 Bedroom</option>
+                <option value="2-bed">2 Bedrooms</option>
+            </select>
+
+            <div>
+                <label>Floor:</label>
+                <button type="submit" name="floor" value="1">1</button>
+                <button type="submit" name="floor" value="2">2</button>
+                <button type="submit" name="floor" value="3">3</button>
+                <button type="submit" name="floor" value="4">4</button>
+                <button type="submit" name="floor" value="5">5</button>
+            </div>
+
+            <div>
+                <label for="min_price">Min Price:</label>
+                <input type="range" name="min_price" id="min_price" min="0" max="1000" step="10" value="0">
+                <span id="min_price_value">0</span>
+            </div>
+            <div>
+                <label for="max_price">Max Price:</label>
+                <input type="range" name="max_price" id="max_price" min="0" max="1000" step="10" value="1000">
+                <span id="max_price_value">1000</span>
+            </div>
+
+            <button type="submit">Filter</button>
+        </form>
+    </div>
+
+    <h2>Available Rooms</h2>
+    <div class="grid-container">
+        {% for room in rooms %}
+            <a href="{% if user.is_authenticated %}{% url 'room_detail' room.id %}{% else %}{% url 'login' %}{% endif %}" class="room {% if room.is_booked %}unavailable{% else %}available{% endif %}">
+                Room {{ room.floor }}{{ room.unit }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <script>
+        const minPriceInput = document.getElementById('min_price');
+        const minPriceValue = document.getElementById('min_price_value');
+        minPriceInput.oninput = function() {
+            minPriceValue.innerText = this.value;
+        }
+
+        const maxPriceInput = document.getElementById('max_price');
+        const maxPriceValue = document.getElementById('max_price_value');
+        maxPriceInput.oninput = function() {
+            maxPriceValue.innerText = this.value;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Room Details</title>
+</head>
+<body>
+    <h1>{{ room.type }} - Floor {{ room.floor }}</h1>
+    <p>Price: {{ room.price }}</p>
+    <p>Description: {{ room.description }}</p>
+
+    <h2>Please Log In or Register to Book This Room</h2>
+    <a href="{% url 'login' %}">Log In</a>
+    <a href="{% url 'register' %}">Create an Account</a>
+</body>
+</html>
