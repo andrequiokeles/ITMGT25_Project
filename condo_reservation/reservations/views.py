@@ -94,6 +94,11 @@ def filter_rooms(request):
         'available_floors': available_floors
     })
 
+from django.shortcuts import render
+from django.db.models import Q
+from datetime import datetime
+from .models import Room, Booking
+
 def room_availability(request):
     available_rooms = Room.objects.filter(is_booked=False)
 
@@ -126,19 +131,23 @@ def room_availability(request):
         available_rooms = available_rooms.filter(price__gte=min_price)
     if max_price:
         available_rooms = available_rooms.filter(price__lte=max_price)
+
+    # Date filtering
     if start_date and end_date:
         try:
             start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
             end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
             
+            # Correctly define the booked_rooms query
             booked_rooms = Booking.objects.filter(
                 Q(start_date__lt=end_date) & 
-                Q(end_date__gt(start_date))
+                Q(end_date__gt=start_date)
             ).values_list('room_id', flat=True)
 
+            # Exclude booked rooms
             available_rooms = available_rooms.exclude(id__in=booked_rooms)
         except ValueError:
-            # Handle date parsing error
+            # Handle date parsing error (optional logging can be added here)
             pass
 
     available_floors = [1, 2, 3, 4, 5]
@@ -153,6 +162,7 @@ def room_availability(request):
         'end_date': end_date,
         'available_floors': available_floors
     })
+
 
 def room_detail(request, room_id):
     room = get_object_or_404(Room, id=room_id)
