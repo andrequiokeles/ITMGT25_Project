@@ -97,36 +97,49 @@ def filter_rooms(request):
 def room_availability(request):
     available_rooms = Room.objects.filter(is_booked=False)
 
+    # Get filters from request
     room_types = request.GET.getlist('room_types')
     floors = request.GET.get('floors', '').split(',')
     if floors == ['']:
         floors = []
 
-    min_price = int(request.GET.get('min_price', 0))
-    max_price = int(request.GET.get('max_price', 10000))
+    # Ensure min_price and max_price are valid integers
+    try:
+        min_price = int(request.GET.get('min_price', 0))
+    except ValueError:
+        min_price = 0
+
+    try:
+        max_price = int(request.GET.get('max_price', 10000))
+    except ValueError:
+        max_price = 10000
+
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
+    # Apply filters
     if room_types:
         available_rooms = available_rooms.filter(type__in=room_types)
     if floors:
         available_rooms = available_rooms.filter(floor__in=floors)
-
     if min_price:
         available_rooms = available_rooms.filter(price__gte=min_price)
     if max_price:
         available_rooms = available_rooms.filter(price__lte=max_price)
-
     if start_date and end_date:
-        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-        
-        booked_rooms = Booking.objects.filter(
-            Q(start_date__lt=end_date) & 
-            Q(end_date__gt=start_date)
-        ).values_list('room_id', flat=True)
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            
+            booked_rooms = Booking.objects.filter(
+                Q(start_date__lt=end_date) & 
+                Q(end_date__gt(start_date))
+            ).values_list('room_id', flat=True)
 
-        available_rooms = available_rooms.exclude(id__in=booked_rooms)
+            available_rooms = available_rooms.exclude(id__in=booked_rooms)
+        except ValueError:
+            # Handle date parsing error
+            pass
 
     available_floors = [1, 2, 3, 4, 5]
 
