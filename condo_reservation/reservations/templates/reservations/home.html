@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Welcome to YO MAMA</title>
+    <title>Welcome to Studio 69</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -32,41 +32,62 @@
         .unavailable {
             background-color: red;
         }
+        .floor-button {
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .selected {
+            background-color: green;
+            color: white;
+        }
     </style>
 </head>
 <body>
-    <h1>Welcome to [CONDO NAME]</h1>
+    <h1>Welcome to Studio 69</h1>
+    <p>Where your pleasure is our measure</p>
     <a href="{% url 'register' %}">Create Account</a>
     <a href="{% url 'login' %}">Log In</a>
     
     <div class="filter-container">
-        <form action="{% url 'filter_rooms' %}" method="get">
-            <label for="type">Room Type:</label>
-            <select name="type" id="type">
-                <option value="">All</option>
-                <option value="studio">Studio</option>
-                <option value="1-bed">1 Bedroom</option>
-                <option value="2-bed">2 Bedrooms</option>
-            </select>
+        <form id="filter-form" action="{% url 'filter_rooms' %}" method="get">
+            <div>
+                <label>Room Type:</label><br>
+                <label><input type="checkbox" name="room_types" value="studio"> Studio</label><br>
+                <label><input type="checkbox" name="room_types" value="1-bed"> 1 Bedroom</label><br>
+                <label><input type="checkbox" name="room_types" value="2-bed"> 2 Bedrooms</label><br>
+            </div>
 
             <div>
                 <label>Floor:</label>
-                <button type="submit" name="floor" value="1">1</button>
-                <button type="submit" name="floor" value="2">2</button>
-                <button type="submit" name="floor" value="3">3</button>
-                <button type="submit" name="floor" value="4">4</button>
-                <button type="submit" name="floor" value="5">5</button>
+                <button type="button" class="floor-button" data-floor="1">1</button>
+                <button type="button" class="floor-button" data-floor="2">2</button>
+                <button type="button" class="floor-button" data-floor="3">3</button>
+                <button type="button" class="floor-button" data-floor="4">4</button>
+                <button type="button" class="floor-button" data-floor="5">5</button>
+                <input type="hidden" name="floors" id="floors">
             </div>
 
             <div>
                 <label for="min_price">Min Price:</label>
-                <input type="range" name="min_price" id="min_price" min="0" max="1000" step="10" value="0">
+                <input type="range" name="min_price" id="min_price" min="0" max="10000" step="10" value="0">
                 <span id="min_price_value">0</span>
             </div>
             <div>
                 <label for="max_price">Max Price:</label>
-                <input type="range" name="max_price" id="max_price" min="0" max="1000" step="10" value="1000">
-                <span id="max_price_value">1000</span>
+                <input type="range" name="max_price" id="max_price" min="0" max="10000" step="10" value="10000">
+                <span id="max_price_value">10000</span>
+            </div>
+
+            <div>
+                <label for="start_date">Start Date:</label>
+                <input type="date" name="start_date" id="start_date" required>
+            </div>
+            <div>
+                <label for="end_date">End Date:</label>
+                <input type="date" name="end_date" id="end_date" required>
             </div>
 
             <button type="submit">Filter</button>
@@ -83,6 +104,11 @@
     </div>
 
     <script>
+        // Set minimum date for start date input
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('start_date').setAttribute('min', today);
+        document.getElementById('end_date').setAttribute('min', today);
+
         const minPriceInput = document.getElementById('min_price');
         const minPriceValue = document.getElementById('min_price_value');
         minPriceInput.oninput = function() {
@@ -94,6 +120,42 @@
         maxPriceInput.oninput = function() {
             maxPriceValue.innerText = this.value;
         }
+
+        const floorButtons = document.querySelectorAll('.floor-button');
+        const floorsInput = document.getElementById('floors');
+        let selectedFloors = [];
+
+        floorButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const floor = this.getAttribute('data-floor');
+                if (selectedFloors.includes(floor)) {
+                    selectedFloors = selectedFloors.filter(f => f !== floor);
+                    this.classList.remove('selected');
+                } else {
+                    selectedFloors.push(floor);
+                    this.classList.add('selected');
+                }
+                floorsInput.value = selectedFloors.join(',');
+            });
+        });
+
+        // Add event listeners to enforce date validation
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+
+        startDateInput.addEventListener('change', function() {
+            const startDate = new Date(this.value);
+            endDateInput.setAttribute('min', this.value);
+        });
+
+        endDateInput.addEventListener('change', function() {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(this.value);
+            if (endDate <= startDate) {
+                alert("End date must be after the start date.");
+                this.value = '';
+            }
+        });
     </script>
 </body>
 </html>

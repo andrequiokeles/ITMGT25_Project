@@ -16,22 +16,30 @@ def room_detail(request, room_id):
     return render(request, 'reservations/room_detail.html', {'room': room})
 
 def filter_rooms(request):
-    if request.method == 'GET':
-        room_type = request.GET.get('type', '')
-        floor = request.GET.get('floor', '')
-        min_price = request.GET.get('min_price', 0)
-        max_price = request.GET.get('max_price', 1000000)
+    room_types = request.GET.getlist('room_types')
+    floors = request.GET.get('floors', '').split(',')
+    min_price = request.GET.get('min_price', 0)
+    max_price = request.GET.get('max_price', 10000)
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
 
-        filters = Q(is_booked=False)
+    rooms = Room.objects.all()
 
-        if room_type:
-            filters &= Q(type=room_type)
-        if floor:
-            filters &= Q(floor=floor)
-        filters &= Q(price__gte=min_price, price__lte=max_price)
+    if room_types:
+        rooms = rooms.filter(type__in=room_types)
+    if floors and floors != ['']:
+        rooms = rooms.filter(floor__in=floors)
+    if min_price:
+        rooms = rooms.filter(price__gte=min_price)
+    if max_price:
+        rooms = rooms.filter(price__lte=max_price)
+    if start_date and end_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        available_rooms = [room for room in rooms if room.is_available(start_date, end_date)]
+        rooms = Room.objects.filter(id__in=[room.id for room in available_rooms])
 
-        rooms = Room.objects.filter(filters).distinct()
-        return render(request, 'reservations/home.html', {'rooms': rooms})
+    return render(request, 'reservations/home.html', {'rooms': rooms})
 
 def register(request):
     if request.method == 'POST':
