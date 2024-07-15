@@ -11,13 +11,13 @@ class Room(models.Model):
     
     type = models.CharField(max_length=20, choices=ROOM_TYPES)
     floor = models.IntegerField()
-    unit = models.CharField(max_length=3)
+    unit = models.CharField(max_length=10)  # Combined unit max_length for consistency
     price = models.DecimalField(max_digits=10, decimal_places=2)
     is_booked = models.BooleanField(default=False)
-    images = models.JSONField(default=list)
+    images = models.JSONField(default=list)  # Storing images as JSON
 
     def __str__(self):
-        return f"{self.type} on floor {self.floor} - Unit {self.unit} - ₱{self.price}"
+        return f"{self.get_type_display()} on floor {self.floor} - Unit {self.unit} - ₱{self.price}"
 
     def is_available(self, start_date, end_date):
         bookings = self.booking_set.filter(
@@ -35,7 +35,18 @@ class Booking(models.Model):
         if self.start_date < date.today():
             raise ValueError("Start date cannot be in the past.")
         if self.end_date <= self.start_date:
-            raise ValueError("End date must be after start date.")
+            raise ValueError("End date must be after the start date.")
         if not self.room.is_available(self.start_date, self.end_date):
             raise ValueError("The room is not available for the selected dates.")
         super().save(*args, **kwargs)
+
+class Transaction(models.Model):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Transaction for Booking {self.booking.id} - Amount: ₱{self.amount} on {self.transaction_date}"
+
+    class Meta:
+        ordering = ['-transaction_date']  

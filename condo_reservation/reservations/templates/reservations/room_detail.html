@@ -2,14 +2,126 @@
 <html>
 <head>
     <title>Room Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .navbar a {
+            text-decoration: none;
+            color: #333;
+            margin-left: 20px;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        .logout-button {
+            background-color: red;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: darkred;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .reservation-form {
+            margin-top: 20px;
+        }
+        .reservation-form label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        .reservation-form input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        .reservation-form button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .reservation-form button:hover {
+            background-color: #45a049;
+        }
+        .auth-links {
+            margin-top: 20px;
+        }
+        .auth-links a {
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>{{ room.type }} - Floor {{ room.floor }}</h1>
-    <p>Price: {{ room.price }}</p>
-    <p>Description: {{ room.description }}</p>
+    <div class="navbar">
+        <div>
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'room_availability' %}">Available Rooms</a>
+        </div>
+        <div>
+            {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">Log Out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Log In</a>
+                <a href="{% url 'register' %}">Create Account</a>
+            {% endif %}
+        </div>
+    </div>
 
-    <h2>Please Log In or Register to Book This Room</h2>
-    <a href="{% url 'login' %}">Log In</a>
-    <a href="{% url 'register' %}">Create an Account</a>
+    <div class="container">
+        <h1>{{ room.get_type_display }} - Floor {{ room.floor }}</h1>
+        <p>Price: ₱{{ room.price }}</p>
+        <p>Description: {{ room.description }}</p>
+
+        {% if user.is_authenticated %}
+            <h2>Reserve This Room</h2>
+            <form action="{% url 'reserve_room' room.id %}" method="post" class="reservation-form">
+                {% csrf_token %}
+                <label for="start_date">Start Date:</label>
+                <input type="date" name="start_date" id="start_date" required>
+                
+                <label for="end_date">End Date:</label>
+                <input type="date" name="end_date" id="end_date" required>
+                
+                <button type="submit">Reserve</button>
+            </form>
+            {% if error %}
+                <p style="color: red;">{{ error }}</p>
+            {% endif %}
+        {% else %}
+            <h2>Please Log In or Register to Book This Room</h2>
+            <div class="auth-links">
+                <a href="{% url 'login' %}">Log In</a>
+                <a href="{% url 'register' %}">Create an Account</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Set minimum date for start date input
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('start_date').setAttribute('min', today);
+        document.getElementById('end_date').setAttribute('min', today);
+    </script>
 </body>
 </html>

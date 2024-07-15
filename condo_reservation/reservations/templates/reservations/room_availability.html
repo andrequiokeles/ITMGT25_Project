@@ -1,12 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Room Availability</title>
+    <title>Available Rooms</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .navbar a {
+            text-decoration: none;
+            color: #333;
+            margin-left: 20px;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        .logout-button {
+            background-color: red;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: darkred;
+        }
+        .filter-container {
+            margin: 20px;
         }
         .grid-container {
             display: grid;
@@ -30,16 +58,132 @@
         .unavailable {
             background-color: red;
         }
+        .floor-button {
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .selected {
+            background-color: green;
+            color: white;
+        }
     </style>
 </head>
 <body>
-    <h1>Room Availability</h1>
+    <div class="navbar">
+        <div>
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'room_availability' %}">Available Rooms</a>
+            {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">Log Out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Log In</a>
+                <a href="{% url 'register' %}">Create Account</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <h1>Book Here!</h1>
+    
+    <div class="filter-container">
+        <form id="filter-form" action="{% url 'room_availability' %}" method="get">
+            <div>
+                <label>Room Type:</label><br>
+                <label><input type="checkbox" name="room_types" value="studio" {% if 'studio' in room_types %}checked{% endif %}> Studio</label><br>
+                <label><input type="checkbox" name="room_types" value="1-bed" {% if '1-bed' in room_types %}checked{% endif %}> 1 Bedroom</label><br>
+                <label><input type="checkbox" name="room_types" value="2-bed" {% if '2-bed' in room_types %}checked{% endif %}> 2 Bedrooms</label><br>
+            </div>
+
+            <div>
+                <label>Floor:</label>
+                {% for floor in available_floors %}
+                    <button type="button" class="floor-button {% if floor in floors %}selected{% endif %}" data-floor="{{ floor }}">{{ floor }}</button>
+                {% endfor %}
+                <input type="hidden" name="floors" id="floors" value="{{ floors|join:',' }}">
+            </div>
+
+            <div>
+                <label for="min_price">Min Price:</label>
+                <input type="number" name="min_price" id="min_price" value="{{ min_price|default:0 }}">
+            </div>
+            <div>
+                <label for="max_price">Max Price:</label>
+                <input type="number" name="max_price" id="max_price" value="{{ max_price|default:10000 }}">
+            </div>
+
+            <div>
+                <label for="start_date">Start Date:</label>
+                <input type="date" name="start_date" id="start_date" value="{{ start_date }}" required>
+            </div>
+            <div>
+                <label for="end_date">End Date:</label>
+                <input type="date" name="end_date" id="end_date" value="{{ end_date }}" required>
+            </div>
+
+            <button type="submit">Filter</button>
+        </form>
+    </div>
+
+    <h2>Available Rooms</h2>
     <div class="grid-container">
-        {% for room in rooms %}
+        {% for room in rooms|dictsortreversed:"unit" %}
             <a href="{% if user.is_authenticated %}{% url 'room_detail' room.id %}{% else %}{% url 'login' %}{% endif %}" class="room {% if room.is_booked %}unavailable{% else %}available{% endif %}">
-                Room {{ room.floor }}{{ room.unit }} <!-- Adjust as per your room model -->
+                Room {{ room.unit }}
             </a>
         {% endfor %}
     </div>
+
+    <script>
+        // Set minimum date for start date input
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('start_date').setAttribute('min', today);
+        document.getElementById('end_date').setAttribute('min', today);
+
+        const floorButtons = document.querySelectorAll('.floor-button');
+        const floorsInput = document.getElementById('floors');
+        let selectedFloors = floorsInput.value.split(',').filter(Boolean);
+
+        floorButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const floor = this.getAttribute('data-floor');
+                if (selectedFloors.includes(floor)) {
+                    selectedFloors = selectedFloors.filter(f => f !== floor);
+                    this.classList.remove('selected');
+                } else {
+                    selectedFloors.push(floor);
+                    this.classList.add('selected');
+                }
+                floorsInput.value = selectedFloors.join(',');
+            });
+
+            // Set the selected class based on the previously selected floors
+            const floorNum = button.getAttribute('data-floor');
+            if (selectedFloors.includes(floorNum)) {
+                button.classList.add('selected');
+            }
+        });
+
+        // Add event listeners to enforce date validation
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+
+        startDateInput.addEventListener('change', function() {
+            endDateInput.setAttribute('min', this.value);
+        });
+
+        endDateInput.addEventListener('change', function() {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(this.value);
+            if (endDate <= startDate) {
+                alert("End date must be after the start date.");
+                this.value = '';
+            }
+        });
+    </script>
 </body>
 </html>

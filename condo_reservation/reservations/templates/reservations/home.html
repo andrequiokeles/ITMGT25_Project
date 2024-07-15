@@ -1,11 +1,37 @@
-<!-- reservations/templates/reservations/home.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Welcome to Studio 69</title>
+    <title>Welcome to BAR Residences</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .navbar a {
+            text-decoration: none;
+            color: #333;
+            margin-left: 20px;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        .logout-button {
+            background-color: red;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: darkred;
         }
         .filter-container {
             margin: 20px;
@@ -46,48 +72,60 @@
     </style>
 </head>
 <body>
-    <h1>Welcome to Studio 69</h1>
-    <p>Where your pleasure is our measure</p>
-    <a href="{% url 'register' %}">Create Account</a>
-    <a href="{% url 'login' %}">Log In</a>
+    <div class="navbar">
+        <div>
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'room_availability' %}">Available Rooms</a>
+            {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">Log Out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Log In</a>
+                <a href="{% url 'register' %}">Create Account</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <h1>Welcome to BAR Residences</h1>
+    <p>Where houses are homes</p>
     
     <div class="filter-container">
         <form id="filter-form" action="{% url 'filter_rooms' %}" method="get">
             <div>
                 <label>Room Type:</label><br>
-                <label><input type="checkbox" name="room_types" value="studio"> Studio</label><br>
-                <label><input type="checkbox" name="room_types" value="1-bed"> 1 Bedroom</label><br>
-                <label><input type="checkbox" name="room_types" value="2-bed"> 2 Bedrooms</label><br>
+                <label><input type="checkbox" name="room_types" value="studio" {% if 'studio' in room_types %}checked{% endif %}> Studio</label><br>
+                <label><input type="checkbox" name="room_types" value="1-bed" {% if '1-bed' in room_types %}checked{% endif %}> 1 Bedroom</label><br>
+                <label><input type="checkbox" name="room_types" value="2-bed" {% if '2-bed' in room_types %}checked{% endif %}> 2 Bedrooms</label><br>
             </div>
 
             <div>
                 <label>Floor:</label>
-                <button type="button" class="floor-button" data-floor="1">1</button>
-                <button type="button" class="floor-button" data-floor="2">2</button>
-                <button type="button" class="floor-button" data-floor="3">3</button>
-                <button type="button" class="floor-button" data-floor="4">4</button>
-                <button type="button" class="floor-button" data-floor="5">5</button>
-                <input type="hidden" name="floors" id="floors">
+                {% for floor in available_floors %}
+                    <button type="button" class="floor-button {% if floor in floors %}selected{% endif %}" data-floor="{{ floor }}">{{ floor }}</button>
+                {% endfor %}
+                <input type="hidden" name="floors" id="floors" value="{{ floors|join:',' }}">
             </div>
 
             <div>
                 <label for="min_price">Min Price:</label>
-                <input type="range" name="min_price" id="min_price" min="0" max="10000" step="10" value="0">
-                <span id="min_price_value">0</span>
+                <input type="range" name="min_price" id="min_price" min="0" max="10000" step="10" value="{{ min_price|default:0 }}">
+                <span id="min_price_value">{{ min_price|default:0 }}</span>
             </div>
             <div>
                 <label for="max_price">Max Price:</label>
-                <input type="range" name="max_price" id="max_price" min="0" max="10000" step="10" value="10000">
-                <span id="max_price_value">10000</span>
+                <input type="range" name="max_price" id="max_price" min="0" max="10000" step="10" value="{{ max_price|default:10000 }}">
+                <span id="max_price_value">{{ max_price|default:10000 }}</span>
             </div>
 
             <div>
                 <label for="start_date">Start Date:</label>
-                <input type="date" name="start_date" id="start_date" required>
+                <input type="date" name="start_date" id="start_date" value="{{ start_date }}" required>
             </div>
             <div>
                 <label for="end_date">End Date:</label>
-                <input type="date" name="end_date" id="end_date" required>
+                <input type="date" name="end_date" id="end_date" value="{{ end_date }}" required>
             </div>
 
             <button type="submit">Filter</button>
@@ -96,9 +134,9 @@
 
     <h2>Available Rooms</h2>
     <div class="grid-container">
-        {% for room in rooms %}
+        {% for room in rooms|dictsortreversed:"unit" %}
             <a href="{% if user.is_authenticated %}{% url 'room_detail' room.id %}{% else %}{% url 'login' %}{% endif %}" class="room {% if room.is_booked %}unavailable{% else %}available{% endif %}">
-                Room {{ room.floor }}{{ room.unit }}
+                Room {{ room.unit }}
             </a>
         {% endfor %}
     </div>
@@ -123,7 +161,7 @@
 
         const floorButtons = document.querySelectorAll('.floor-button');
         const floorsInput = document.getElementById('floors');
-        let selectedFloors = [];
+        let selectedFloors = floorsInput.value.split(',').filter(Boolean);
 
         floorButtons.forEach(button => {
             button.addEventListener('click', function() {
@@ -137,6 +175,12 @@
                 }
                 floorsInput.value = selectedFloors.join(',');
             });
+
+            // Set the selected class based on the previously selected floors
+            const floorNum = button.getAttribute('data-floor');
+            if (selectedFloors.includes(floorNum)) {
+                button.classList.add('selected');
+            }
         });
 
         // Add event listeners to enforce date validation
@@ -144,7 +188,6 @@
         const endDateInput = document.getElementById('end_date');
 
         startDateInput.addEventListener('change', function() {
-            const startDate = new Date(this.value);
             endDateInput.setAttribute('min', this.value);
         });
 
