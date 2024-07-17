@@ -1,0 +1,283 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Room Details</title>
+    <style>
+        html, body{
+            margin: 0;
+            height: 100%;
+            text-overflow: clip;
+            text-wrap: nowrap;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-image: url('/static/reservations/images/bg_image.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .navbar{
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            overflow: hidden;
+            background-color: #0000009d;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.275);
+            color: #ffffff;
+            transition: 0.3s ease;
+        }
+        .navbar.sticky{
+            background-color: #000000;
+            transition:0.3s ease;
+        }
+        .navbar_logo{
+            width: 240px;
+            height: auto;
+            position: absolute;
+            top: 5px;
+            
+        }
+        .navbar nav {
+            justify-content: space-between;
+            align-items: center;
+            display: flex;
+            padding: 10px;
+        }
+        .navbar ul {
+            list-style: none;
+            margin: auto;
+            color: #333;
+            display: flex;
+            padding: 0;
+        }
+        .navbar li {
+            padding: 10px;
+            text-decoration: none;
+            color: #000000;
+            font-size: 20px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            
+        }
+        .navbar li:hover {
+            border-bottom: 4px #ffffff solid;
+            padding-bottom: 6px;
+            transform: translateY(-2px);
+            transition: transform 0.2s;
+        }
+        .navbar a{
+            color: #ffffff;
+            text-decoration: none;
+        }
+        .logout-button {
+            background-color: transparent;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            position: absolute;
+            right: 2%;
+            font-size: 20px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .logout-button:hover {
+            background-color: rgb(70, 21, 21);
+            box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+            transform: translateY(-2px);
+            transition: transform 0.2s;
+        }
+        .profile{
+            position: relative;
+            display: inline-block;
+            position: fixed;
+            right: 10px;
+            top: 5px;
+            border: none;
+        }
+        .login_symbol{
+            height:50px;
+            width: auto;
+        }
+        .profile:hover .login_symbol{
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            border-radius: 20px;
+        }
+        .profile_content{
+            display: none;
+            position: absolute;
+            background-color: #f1f1f1;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            transform: translateX(-160px);
+            border: none;
+        }
+        .profile a{
+            color: black;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            padding: 5px;
+            margin: auto;
+        }
+        .profile:hover .profile_content{
+            display: block;
+            border: none;
+        } 
+        .profile_content a:hover{
+            background-color: #ddd;;
+            text-decoration: none;
+            border: none;
+        }
+        .profile_content li:hover{
+            border-color: #f1f1f1;;
+        }
+        .container {
+            max-width: 50%;
+            margin: auto;
+            padding: 20px;
+            background-color: white;
+        }
+        .reservation-form {
+            margin-top: 20px;
+        }
+        .reservation-form label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        .reservation-form input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        .reservation-form button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: block;
+            margin: auto;
+            transition: transform 0.2s;
+        }
+        .reservation-form button:hover {
+            color: #fff;
+            background-color: #0f5229;
+            box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+            transform: translateY(-2px);
+            transition: transform 0.2s;
+        }
+        .auth-links {
+            margin-top: 20px;
+        }
+        .auth-links a {
+            margin-right: 10px;
+        }
+        .studio-pic{
+            max-width: 80%;
+            height: auto;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 100px;
+        }
+        .pic-desc{
+            font-size: 10px;
+            color: #3333339f;
+            padding: 0;
+            font-weight: lighter;
+            text-align: center;
+        }
+        #start_date, #end_date{
+            font-family: Arial, Helvetica, sans-serif;
+            width: 200px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar" id="navbar">
+        <nav>
+            <a  href="{% url 'home' %}"><img class="navbar_logo" src="{% static 'reservations/images/Navbar_Logo.png' %}" alt="{% url 'home' %}"></a>
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'room_availability' %}">Available Rooms</a></li>
+                {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">Log Out</button>
+                </form>
+                {% else %}
+                <div class="profile">
+                    <img class="login_symbol" src="{% static 'reservations/images/login symbol.png' %}" alt="Login">
+                    <div class="profile_content">
+                        <li><a href="{% url 'login' %}">Log In</a></li>
+                        <li><a href="{% url 'register' %}">Create Account</a></li>
+                    </div>
+                    
+                </div>
+                
+                {% endif %}                
+            </ul>
+        </nav>
+    </div>
+    <div class="container">
+        {% if room.get_type_display == "Studio" %}
+                <img src="{% static 'reservations/images/Studio.png' %}" alt ="Render of Studio Unit" class="studio-pic">
+                <p class="pic-desc">Render of Studio Model Unit</p>
+        {% elif room.get_type_display == "1 Bedroom" %}
+                <img src="{% static 'reservations/images/1 bedroom.png' %}" alt ="Render of 1 Bedroom Unit" class="studio-pic">
+                <p class="pic-desc">Render of 1-Bedroom Model Unit</p>
+        {% elif room.get_type_display == "2 Bedrooms" %}
+            <img src="{% static 'reservations/images/2 Bedrooms.png' %}" alt ="Render of 2-Bedroom Unit" class="studio-pic">
+            <p class="pic-desc">Render of 2-Bedroom Model Unit</p>
+        {% endif %}
+        <h1>{{ room.get_type_display }} - Floor {{ room.floor }}</h1>
+        <p>Price: ₱{{ room.price }}</p>
+        <p>Description: {{ room.description }}</p>
+
+        {% if user.is_authenticated %}
+            <h2>Reserve This Room</h2>
+            <form action="{% url 'reserve_room' room.id %}" method="post" class="reservation-form">
+                {% csrf_token %}
+                <label for="start_date">Start Date:</label>
+                <input type="date" name="start_date" id="start_date" required>
+                
+                <label for="end_date">End Date:</label>
+                <input type="date" name="end_date" id="end_date" required>
+                
+                <button type="submit">Reserve</button>
+            </form>
+            {% if error %}
+                <p style="color: red;">{{ error }}</p>
+            {% endif %}
+        {% else %}
+            <h2>Please Log In or Register to Book This Room</h2>
+            <div class="auth-links">
+                <a href="{% url 'login' %}">Log In</a>
+                <a href="{% url 'register' %}">Create an Account</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        window.addEventListener('scroll', function() {
+        var navbar = document.getElementById('navbar');
+        if (window.scrollY > 50) { // Adjust scroll value as needed
+            navbar.classList.add('sticky');
+        } else {
+            navbar.classList.remove('sticky');
+        }
+        });
+        // Set minimum date for start date input
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('start_date').setAttribute('min', today);
+        document.getElementById('end_date').setAttribute('min', today);
+    </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    {% load static %}
+    <style>
+        body{
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            background-image: url('../static/reservations/images/bg_image.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            padding: 0;
+            margin: 0;
+        }
+        .main{
+            width: 40%;
+            height: 100vh;
+            margin: auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .info  {
+            margin:10px auto;
+        }
+        .logo{
+           margin: 20px auto;
+           padding-bottom: 50px;
+           border-bottom: #33333388 2px solid;
+           width: 90%;
+        }
+        .button{
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            margin: 6% auto;
+            cursor: pointer;
+        }
+        .button:hover{
+            background-color: #0f5229;
+            transform: translateY(-2px);
+            transition: transform 0.2s;
+        }
+        .register{
+           margin: 30px auto;
+           padding-top: 50px;
+           border-top: #33333388 2px solid;
+           width: 90%;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <a  href="{% url 'home' %}"><img class="logo" src="{% static 'reservations/images/Login_Logo.png' %}" alt="Studio 69 Logo"></a>
+       <h1>Login</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="info">
+            <label for="username">Username:</label>
+            <input type="text" name="username" id="username" required>
+        </div>
+        <div class="info">
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" required>
+        </div>
+        <button class="button" type="submit">Log in</button>
+    </form>
+    <p class="register">Don't have an account? <a href="{% url 'register' %}">Register here</a>.</p> 
+    </div>
+    
+</body>
+</html>

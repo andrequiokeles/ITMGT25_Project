@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Studio 69</title>
+    <style>
+        html, body{
+            margin: 0;
+            height: 100%;
+            text-overflow: clip;
+            text-wrap: nowrap;
+        }
+        body {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            background-image: url('../static/reservations/images/bg_image.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .navbar{
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: #0000009d;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.275);
+            color: #ffffff;
+        }
+        .navbar_logo{
+            width: 240px;
+            height: auto;
+            position: absolute;
+            top: 5px;
+            
+        }
+        .navbar nav {
+            justify-content: space-between;
+            align-items: center;
+            display: flex;
+            padding: 10px;
+        }
+        .navbar ul {
+            list-style: none;
+            margin: auto;
+            color: #333;
+            display: flex;
+            padding: 0;
+        }
+        .navbar li {
+            padding: 10px;
+            text-decoration: none;
+            color: #000000;
+            font-size: 20px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            
+        }
+        .navbar li:hover {
+            border-bottom: 4px #ffffff solid;
+            padding-bottom: 6px;
+        }
+        .navbar a{
+            color: #ffffff;
+            text-decoration: none;
+        }
+        .logout-button {
+            background-color: transparent;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            position: absolute;
+            right: 2%;
+            font-size: 20px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .logout-button:hover {
+            background-color: rgb(70, 21, 21);
+            box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+            transform: translateY(-2px);
+            transition: transform 0.2s;
+        }
+        .quote{
+            color: #ffffff;
+            margin-left: 30px;
+            margin-top: 0px;
+            display: inline-block;
+            padding: 0px;
+            text-shadow: 2px 2px 8px black;
+            font-size: 50px;
+            text-align: center;
+        }
+        .book_button{
+            margin-top: 15%;
+            display: inline-block;
+            margin-left: 30%;
+            font-size: 50px;
+            background-color: rgb(255, 216, 61);
+            color: rgb(0, 0, 0);
+            border-radius: 15px;
+            padding: 20px 40px;
+            font-style: oblique;
+            border-width: 0;
+            letter-spacing: 1px;
+            text-decoration: none;
+            transform: translateY(0px);
+            transition: transform 0.2s;
+        }
+        .book_button:hover{
+            box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+            transform: translateY(-2px);
+            transition: transform 0.2s;
+            background-color: rgb(255, 216, 61);
+        }
+        .book_button:active{
+            transform: translateY(0px);
+        }
+        .login_logo{
+            height: 30px;
+            width: auto;
+            padding: 5px;
+        }
+        .login_text{
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px;
+            text-align: center;
+            position: absolute;
+            right: 5px;
+            align-items: center;
+            display: flex;
+        }
+        .profile{
+            position: relative;
+            display: inline-block;
+            position: fixed;
+            right: 10px;
+            top: 5px;
+            border: none;
+        }
+        .login_symbol{
+            height:50px;
+            width: auto;
+        }
+        .profile:hover .login_symbol{
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            border-radius: 20px;
+        }
+        .profile_content{
+            display: none;
+            position: absolute;
+            background-color: #f1f1f1;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            transform: translateX(-160px);
+            border: none;
+        }
+        .profile a{
+            color: black;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            padding: 5px;
+            margin: auto;
+        }
+        .profile:hover .profile_content{
+            display: block;
+            border: none;
+        } 
+        .profile_content a:hover{
+            background-color: #ddd;;
+            text-decoration: none;
+            border: none;
+        }
+        .profile_content li:hover{
+            border-color: #f1f1f1;;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <nav>
+            <a  href="{% url 'home' %}"><img class="navbar_logo" src="{% static 'reservations/images/Navbar_Logo.png' %}" alt="{% url 'home' %}"></a>
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'room_availability' %}">Available Rooms</a></li>
+                {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">Log Out</button>
+                </form>
+                {% else %}
+                    <div class="profile">
+                        <img class="login_symbol" src="{% static 'reservations/images/login symbol.png' %}" alt="Login">
+                        <div class="profile_content">
+                            <li><a href="{% url 'login' %}">Log In</a></li>
+                            <li><a href="{% url 'register' %}">Create Account</a></li>
+                        </div>
+                        
+                    </div>
+                    
+                {% endif %}                
+            </ul>
+        </nav>
+    </div>
+    <h1 class="quote">Your peaceful abode <br>in the busy city</h1>
+    <div>
+        <a href="{% url 'room_availability' %}" class="book_button"> Book a Reservation!</a>   
+    </div>
+
+</body>
+</html>

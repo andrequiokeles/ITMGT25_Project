@@ -1,0 +1,21 @@
+<!-- reservations.html -->
+
+<h1>Your Reservations</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Room</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in bookings %}
+        <tr>
+            <td>Room {{ booking.room.unit }}</td>
+            <td>{{ booking.start_date }}</td>
+            <td>{{ booking.end_date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

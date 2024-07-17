@@ -1,0 +1,21 @@
+<!-- transactions.html -->
+
+<h1>Your Transactions</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Booking ID</th>
+            <th>Amount</th>
+            <th>Transaction Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for transaction in transactions %}
+        <tr>
+            <td>{{ transaction.booking.id }}</td>
+            <td>₱{{ transaction.amount }}</td>
+            <td>{{ transaction.transaction_date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

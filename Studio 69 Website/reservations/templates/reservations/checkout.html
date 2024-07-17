@@ -1,0 +1,101 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Checkout</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .room-details {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 20px;
+        }
+        .room-details h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .room-info {
+            margin-bottom: 20px;
+        }
+        .room-info p {
+            margin: 5px 0;
+        }
+        .price-details {
+            margin-top: 20px;
+        }
+        .price-details h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .price-details p {
+            margin: 5px 0;
+        }
+        .total-price {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #333;
+        }
+        .btn-container {
+            margin-top: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #0f5229;
+            transform: translateY(-2px);
+            transition: transform 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img class="logo" src="{% static 'reservations/images/Login_Logo.png' %}" alt="Studio 69 Logo">
+        <div class="room-details">
+            <h2>Room Details</h2>
+            <div class="room-info">
+                <p><strong>Type:</strong> {{ room.get_type_display }}</p>
+                <p><strong>Floor:</strong> {{ room.floor }}</p>
+                <p><strong>Room Number:</strong> {{ room.unit }}</p>
+            </div>
+            <div class="price-details">
+                <h3>Price Details</h3>
+                <p><strong>Price per night:</strong> ₱{{ room.price }}</p>
+                {% if start_date and end_date %}
+                    <p><strong>Nights:</strong> {{ nights }}</p>
+                    <p><strong>Total Price:</strong> ₱{{ total_price }}</p>
+                    <p class="total-price">Total: ₱{{ total_price }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="btn-container">
+            <a href="{% url 'room_detail' room.id %}" class="btn">Back to Reservation</a>
+            <a href="{% url 'payment' room.id %}" class="btn">Proceed to Payment</a>
+        </div>
+    </div>
+</body>
+</html>
