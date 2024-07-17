@@ -69,6 +69,15 @@
             background-color: green;
             color: white;
         }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .slider-value {
+            min-width: 50px;
+        }
     </style>
 </head>
 <body>
@@ -108,12 +117,16 @@
             </div>
 
             <div>
-                <label for="min_price">Min Price:</label>
-                <input type="number" name="min_price" id="min_price" value="{{ min_price|default:0 }}">
-            </div>
-            <div>
-                <label for="max_price">Max Price:</label>
-                <input type="number" name="max_price" id="max_price" value="{{ max_price|default:10000 }}">
+                <label for="price_range">Price range:</label>
+                <div class="slider-container">
+                    <label for="price_range_min">Min Price:</label>
+                    <input type="range" id="price_range_min" name="min_price" min="0" max="10000" value="{{ min_price }}">
+                    <span class="slider-value" id="price_min_display">{{ min_price }}</span>
+                    <span>-</span>
+                    <label for="price_range_max">Max Price:</label>
+                    <input type="range" id="price_range_max" name="max_price" min="0" max="10000" value="{{ max_price }}">
+                    <span class="slider-value" id="price_max_display">{{ max_price }}</span>
+                </div>
             </div>
 
             <div>
@@ -184,6 +197,30 @@
                 this.value = '';
             }
         });
+
+        // Update slider display values and enforce price constraints
+        const priceMinInput = document.getElementById('price_range_min');
+        const priceMaxInput = document.getElementById('price_range_max');
+        const priceMinDisplay = document.getElementById('price_min_display');
+        const priceMaxDisplay = document.getElementById('price_max_display');
+
+        priceMinInput.addEventListener('input', () => {
+            if (parseInt(priceMinInput.value) > parseInt(priceMaxInput.value)) {
+                priceMinInput.value = priceMaxInput.value;
+            }
+            priceMinDisplay.textContent = priceMinInput.value;
+        });
+
+        priceMaxInput.addEventListener('input', () => {
+            if (parseInt(priceMaxInput.value) < parseInt(priceMinInput.value)) {
+                priceMaxInput.value = priceMinInput.value;
+            }
+            priceMaxDisplay.textContent = priceMaxInput.value;
+        });
+
+        // Set initial slider display values
+        priceMinDisplay.textContent = priceMinInput.value;
+        priceMaxDisplay.textContent = priceMaxInput.value;
     </script>
 </body>
 </html>
