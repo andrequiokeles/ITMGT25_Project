@@ -5,7 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', views.home, name='home'), 
+    path('', views.home, name='home'),
     path('filter/', views.filter_rooms, name='filter_rooms'),
     path('register/', views.register, name='register'),
     path('login/', views.user_login, name='login'),
@@ -17,6 +17,9 @@ urlpatterns = [
     path('room/<int:room_id>/payment/', views.payment, name='payment'),
     path('room/<int:room_id>/upload_proof/', views.upload_proof_of_payment, name='upload_proof_of_payment'),
     path('next-page/', views.proceed_to_next_page, name='proceed_to_next_page'),
+    path('building-overview/', views.building_overview, name='building_overview'),
+    path('reservation-history/', views.reservation_history, name='reservation_history'),
+    path('cancel-reservation/<int:booking_id>/', views.cancel_reservation, name='cancel_reservation'),  
 ]
 
 if settings.DEBUG:

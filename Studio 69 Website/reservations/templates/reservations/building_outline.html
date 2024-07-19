@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Building Overview</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .navbar a {
+            text-decoration: none;
+            color: #333;
+            margin-left: 20px;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        .logout-button {
+            background-color: red;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: darkred;
+        }
+        .filter-container {
+            margin: 20px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(5, 100px);
+            gap: 10px;
+            margin: 20px;
+        }
+        .room {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .available {
+            background-color: green;
+        }
+        .booked {
+            background-color: grey;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div>
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'room_availability' %}">Available Rooms</a>
+            <a href="{% url 'building_overview' %}">Building Overview</a>
+            {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">Log Out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Log In</a>
+                <a href="{% url 'register' %}">Create Account</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <h1>Building Overview</h1>
+
+    <div class="filter-container">
+        <form action="{% url 'building_overview' %}" method="get">
+            <label for="selected_date">Select Date:</label>
+            <input type="date" name="selected_date" id="selected_date" value="{{ selected_date|default_if_none:'' }}" required>
+            <button type="submit">Check Availability</button>
+        </form>
+    </div>
+
+    <div class="grid-container">
+        {% for room in room_status %}
+            <div class="room {% if room.status == 'booked' %}booked{% else %}available{% endif %}" 
+                 data-room-id="{{ room.room.id }}">
+                Room {{ room.room.unit }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Add event listeners to available rooms for booking
+        const availableRooms = document.querySelectorAll('.available');
+        availableRooms.forEach(room => {
+            room.addEventListener('click', () => {
+                const roomId = room.getAttribute('data-room-id');
+                if (confirm('Do you want to book this room?')) {
+                    window.location.href = `{% url 'room_detail' 0 %}`.replace('/0/', `/${roomId}/`);
+                }
+            });
+        });
+
+        // Set the min attribute for the date input to today's date
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('selected_date').setAttribute('min', today);
+    </script>
+</body>
+</html>

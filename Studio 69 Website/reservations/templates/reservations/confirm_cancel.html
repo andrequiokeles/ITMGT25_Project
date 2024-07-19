@@ -1,0 +1,16 @@
+<!-- reservations/templates/reservations/confirm_cancel.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cancel Reservation</title>
+</head>
+<body>
+    <h1>Cancel Reservation</h1>
+    <p>Are you sure you want to cancel your reservation for Room {{ booking.room.number }}?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirm Cancellation</button>
+        <a href="{% url 'reservation_history' %}">Cancel</a>
+    </form>
+</body>
+</html>

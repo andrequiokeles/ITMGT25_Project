@@ -1,0 +1,44 @@
+<!-- reservations/templates/reservations/reservation_history.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reservation History</title>
+</head>
+<body>
+    <h1>Reservation History</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Room Number</th>
+                <th>Room Type</th>
+                <th>Room Floor</th>
+                <th>Price</th>
+                <th>Nights</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reservation in reservations %}
+                <tr>
+                    <td>{{ reservation.room_number }}</td>
+                    <td>{{ reservation.room_type }}</td>
+                    <td>{{ reservation.room_floor }}</td>
+                    <td>{{ reservation.price }}</td>
+                    <td>{{ reservation.nights }}</td>
+                    <td>{{ reservation.start_date }}</td>
+                    <td>{{ reservation.end_date }}</td>
+                    <td>
+                        {% if not reservation.is_canceled %}
+                            <a href="{% url 'cancel_reservation' reservation.id %}">Cancel</a>
+                        {% else %}
+                            Canceled
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -6,7 +6,6 @@ from django.db.models import Q
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import Booking
 
 def home(request):
     rooms = Room.objects.filter(is_booked=False)
@@ -293,3 +292,67 @@ def upload_proof_of_payment(request, room_id):
         return JsonResponse({'message': 'Proof of payment uploaded successfully'}, status=200)
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def building_overview(request):
+    selected_date = request.GET.get('selected_date')
+    if selected_date:
+        try:
+            selected_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
+        except ValueError:
+            selected_date = None
+    else:
+        selected_date = datetime.today().date()
+
+    rooms = Room.objects.all()
+    room_status = []
+
+    for room in rooms:
+        bookings = Booking.objects.filter(room=room, start_date__lte=selected_date, end_date__gte=selected_date)
+        if bookings.exists():
+            room_status.append({'room': room, 'status': 'booked'})
+        else:
+            room_status.append({'room': room, 'status': 'available'})
+
+    return render(request, 'reservations/building_outline.html', {
+        'room_status': room_status,
+        'selected_date': selected_date,
+    })
+
+@login_required
+def reservation_history(request):
+    # Get the current logged-in user
+    user = request.user
+
+    # Retrieve all bookings for the user
+    bookings = Booking.objects.filter(user=user).select_related('room')
+
+    reservation_data = []
+    for booking in bookings:
+        room = booking.room
+        nights = (booking.end_date - booking.start_date).days
+        reservation_data.append({
+            'room_number': room.number,
+            'room_type': room.type,
+            'room_floor': room.floor,
+            'price': room.price,
+            'nights': nights,
+            'start_date': booking.start_date,
+            'end_date': booking.end_date,
+        })
+
+    return render(request, 'reservations/reservation_history.html', {
+        'reservations': reservation_data
+    })
+
+@login_required
+def cancel_reservation(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if request.method == 'POST':
+        booking.is_canceled = True
+        booking.room.is_booked = False
+        booking.room.save()
+        booking.save()
+        return redirect('reservation_history')
+
+    return render(request, 'reservations/confirm_cancel.html', {'booking': booking})
