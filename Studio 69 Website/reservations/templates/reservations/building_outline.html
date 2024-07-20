@@ -141,6 +141,8 @@
             display: flex;
             padding-bottom: 10px;
             border-bottom: #33333360 solid 2px;
+            z-index: 1000;
+            position: relative;
         }
         .bgimg{
             background-image: url('{% static "reservations/images/Building_Overview.png"%}');
@@ -154,6 +156,7 @@
             height: 800px;
             margin-left: auto;
             margin-right: auto;
+            z-index: 1;
         }
         .grid-container {
             display: grid;
@@ -168,6 +171,7 @@
             margin-right: auto;
             padding-top: 355px;
             padding-left: 160px;
+            z-index: 1;
         }
         .room {
             display: flex;
@@ -235,7 +239,7 @@
     </div>
     <div class="bgimg">
         <div class="grid-container">
-            {% for room in room_status|dictsortreversed:"room.unit"  %}
+            {% for room in room_status|dictsortreversed:"room.unit" %}
                 <div class="room {% if room.status == 'booked' %}booked{% else %}available{% endif %}" 
                     data-room-id="{{ room.room.id }}">
                     Room {{ room.room.unit }}
