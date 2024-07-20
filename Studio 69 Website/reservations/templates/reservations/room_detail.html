@@ -203,28 +203,28 @@
     </style>
 </head>
 <body>
-    <div class="navbar" id="navbar">
+    <div class="navbar">
         <nav>
-            <a href="{% url 'home' %}">
-                <img class="navbar_logo" src="{% static 'reservations/images/Navbar_Logo.png' %}" alt="Home">
-            </a>
+            <a href="{% url 'home' %}"><img class="navbar_logo" src="{% static 'reservations/images/Navbar_Logo.png' %}" alt="Studio 69"></a>
             <ul>
                 <li><a href="{% url 'home' %}">Home</a></li>
                 <li><a href="{% url 'room_availability' %}">Available Rooms</a></li>
+                <li><a href="{% url 'building_overview' %}">Building Calendar</a></li> <!-- Link to building overview -->
                 {% if user.is_authenticated %}
+                <li><a href="{% url 'reservation_history' %}">Reservation History</a></li> <!-- Link to reservation history -->
                 <form action="{% url 'logout' %}" method="post" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="logout-button">Log Out</button>
                 </form>
                 {% else %}
-                <div class="profile">
-                    <img class="login_symbol" src="{% static 'reservations/images/login symbol.png' %}" alt="Login">
-                    <div class="profile_content">
-                        <li><a href="{% url 'login' %}">Log In</a></li>
-                        <li><a href="{% url 'register' %}">Create Account</a></li>
+                    <div class="profile">
+                        <img class="login_symbol" src="{% static 'reservations/images/login symbol.png' %}" alt="Login">
+                        <div class="profile_content">
+                            <li><a href="{% url 'login' %}">Log In</a></li>
+                            <li><a href="{% url 'register' %}">Create Account</a></li>
+                        </div>
                     </div>
-                </div>
-                {% endif %}                
+                {% endif %}
             </ul>
         </nav>
     </div>

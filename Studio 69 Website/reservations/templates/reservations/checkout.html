@@ -53,7 +53,13 @@
             color: #333;
         }
         .btn-container {
-            margin-top: 20px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            margin-left: auto;
+            margin-right: auto;
+            justify-content: center;
+            align-items: center;
+            display: flex;
         }
         .btn {
             display: inline-block;
@@ -69,6 +75,33 @@
             background-color: #0f5229;
             transform: translateY(-2px);
             transition: transform 0.2s;
+        }
+        .qrcodes{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .qrcodes img{
+            width: 50%;
+            height: auto;
+        }
+        .paylabel{
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+        }
+        .qrlabels{
+            display: flex;
+            font-weight: bold;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        .qrlabels p{
+            text-align: center;
+            width: 50%;
         }
     </style>
 </head>
@@ -91,6 +124,15 @@
                     <p class="total-price">Total: ₱{{ total_price }}</p>
                 {% endif %}
             </div>
+        </div>
+        <h2 class="paylabel">Pay through QR</h2>
+        <div class="qrlabels">
+            <p>GCash</p>
+            <p>BPI</p>
+        </div>
+        <div class="qrcodes">
+            <img src="{% static 'reservations/images/GCash.jpg' %}">
+            <img src="{% static 'reservations/images/bpi.jpg' %}">
         </div>
         <div class="btn-container">
             <a href="{% url 'room_detail' room.id %}" class="btn">Back to Reservation</a>
