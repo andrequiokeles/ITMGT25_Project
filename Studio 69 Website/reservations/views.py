@@ -297,59 +297,6 @@ def checkout(request, room_id):
 def proceed_to_next_page(request):
     return render(request, 'next_page.html')
 
-def payment(request, room_id):
-    room = get_object_or_404(Room, id=room_id)
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    total_price = 0
-    nights = 0
-
-    #used to see start and end dates retrieved
-    print(f"Retrieved start_date: {start_date}")
-    print(f"Retrieved end_date: {end_date}")
-
-    if start_date and end_date:
-        try:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-            if start_date < end_date:
-                nights = (end_date - start_date).days
-                total_price = room.price * nights if nights > 0 else 0
-                print(f"Start Date: {start_date}, End Date: {end_date}, Nights: {nights}, Total Price: {total_price}")
-            else:
-                print("End date is before start date.")
-                total_price = 0
-                nights = 0
-        except ValueError:
-            print("Date conversion failed.")
-            total_price = 0
-            nights = 0
-
-    return render(request, 'reservations/payment.html', {
-        'room': room,
-        'start_date': start_date,
-        'end_date': end_date,
-        'total_price': total_price,
-        'nights': nights,
-    })
-
-def upload_proof_of_payment(request, room_id):
-    if request.method == 'POST':
-        proof_of_payment = request.FILES.get('proof_of_payment')
-
-        if not proof_of_payment:
-            return JsonResponse({'error': 'No file uploaded'}, status=400)
-        
-        booking = get_object_or_404(Booking, room_id=room_id)
-
-        # Update and upload proof of payment
-        booking.proof_of_payment = proof_of_payment
-        booking.save()
-        
-        return JsonResponse({'message': 'Proof of payment uploaded successfully'}, status=200)
-    
-    return JsonResponse({'error': 'Invalid request'}, status=400)
-
 def building_overview(request):
     selected_date = request.GET.get('selected_date')
     if selected_date:
