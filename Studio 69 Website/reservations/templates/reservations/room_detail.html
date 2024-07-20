@@ -4,7 +4,7 @@
 <head>
     <title>Room Details</title>
     <style>
-        html, body{
+        html, body {
             margin: 0;
             height: 100%;
             text-overflow: clip;
@@ -12,13 +12,13 @@
         }
         body {
             font-family: Arial, Helvetica, sans-serif;
-            background-image: url('/static/reservations/images/bg_image.jpg');
+            background-image: url('{% static 'reservations/images/bg_image.jpg' %}');
             background-repeat: no-repeat;
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
-        .navbar{
+        .navbar {
             position: fixed;
             width: 100%;
             top: 0;
@@ -29,16 +29,15 @@
             color: #ffffff;
             transition: 0.3s ease;
         }
-        .navbar.sticky{
+        .navbar.sticky {
             background-color: #000000;
-            transition:0.3s ease;
+            transition: 0.3s ease;
         }
-        .navbar_logo{
+        .navbar_logo {
             width: 240px;
             height: auto;
             position: absolute;
             top: 5px;
-            
         }
         .navbar nav {
             justify-content: space-between;
@@ -60,7 +59,6 @@
             font-size: 20px;
             font-weight: bold;
             transition: background-color 0.3s ease;
-            
         }
         .navbar li:hover {
             border-bottom: 4px #ffffff solid;
@@ -68,7 +66,7 @@
             transform: translateY(-2px);
             transition: transform 0.2s;
         }
-        .navbar a{
+        .navbar a {
             color: #ffffff;
             text-decoration: none;
         }
@@ -91,7 +89,7 @@
             transform: translateY(-2px);
             transition: transform 0.2s;
         }
-        .profile{
+        .profile {
             position: relative;
             display: inline-block;
             position: fixed;
@@ -99,15 +97,15 @@
             top: 5px;
             border: none;
         }
-        .login_symbol{
-            height:50px;
+        .login_symbol {
+            height: 50px;
             width: auto;
         }
-        .profile:hover .login_symbol{
+        .profile:hover .login_symbol {
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
             border-radius: 20px;
         }
-        .profile_content{
+        .profile_content {
             display: none;
             position: absolute;
             background-color: #f1f1f1;
@@ -117,7 +115,7 @@
             transform: translateX(-160px);
             border: none;
         }
-        .profile a{
+        .profile a {
             color: black;
             text-decoration: none;
             display: block;
@@ -125,17 +123,17 @@
             padding: 5px;
             margin: auto;
         }
-        .profile:hover .profile_content{
+        .profile:hover .profile_content {
             display: block;
             border: none;
         } 
-        .profile_content a:hover{
-            background-color: #ddd;;
+        .profile_content a:hover {
+            background-color: #ddd;
             text-decoration: none;
             border: none;
         }
-        .profile_content li:hover{
-            border-color: #f1f1f1;;
+        .profile_content li:hover {
+            border-color: #f1f1f1;
         }
         .container {
             max-width: 50%;
@@ -178,7 +176,7 @@
         .auth-links a {
             margin-right: 10px;
         }
-        .studio-pic{
+        .studio-pic {
             max-width: 80%;
             height: auto;
             display: block;
@@ -186,24 +184,30 @@
             margin-right: auto;
             margin-top: 100px;
         }
-        .pic-desc{
+        .pic-desc {
             font-size: 10px;
             color: #3333339f;
             padding: 0;
             font-weight: lighter;
             text-align: center;
         }
-        #start_date, #end_date{
+        #start_date, #end_date {
             font-family: Arial, Helvetica, sans-serif;
             width: 200px;
             cursor: pointer;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
     <div class="navbar" id="navbar">
         <nav>
-            <a  href="{% url 'home' %}"><img class="navbar_logo" src="{% static 'reservations/images/Navbar_Logo.png' %}" alt="{% url 'home' %}"></a>
+            <a href="{% url 'home' %}">
+                <img class="navbar_logo" src="{% static 'reservations/images/Navbar_Logo.png' %}" alt="Home">
+            </a>
             <ul>
                 <li><a href="{% url 'home' %}">Home</a></li>
                 <li><a href="{% url 'room_availability' %}">Available Rooms</a></li>
@@ -219,22 +223,20 @@
                         <li><a href="{% url 'login' %}">Log In</a></li>
                         <li><a href="{% url 'register' %}">Create Account</a></li>
                     </div>
-                    
                 </div>
-                
                 {% endif %}                
             </ul>
         </nav>
     </div>
     <div class="container">
         {% if room.get_type_display == "Studio" %}
-                <img src="{% static 'reservations/images/Studio.png' %}" alt ="Render of Studio Unit" class="studio-pic">
-                <p class="pic-desc">Render of Studio Model Unit</p>
+            <img src="{% static 'reservations/images/Studio.png' %}" alt="Render of Studio Unit" class="studio-pic">
+            <p class="pic-desc">Render of Studio Model Unit</p>
         {% elif room.get_type_display == "1 Bedroom" %}
-                <img src="{% static 'reservations/images/1 bedroom.png' %}" alt ="Render of 1 Bedroom Unit" class="studio-pic">
-                <p class="pic-desc">Render of 1-Bedroom Model Unit</p>
+            <img src="{% static 'reservations/images/1 bedroom.png' %}" alt="Render of 1 Bedroom Unit" class="studio-pic">
+            <p class="pic-desc">Render of 1-Bedroom Model Unit</p>
         {% elif room.get_type_display == "2 Bedrooms" %}
-            <img src="{% static 'reservations/images/2 Bedrooms.png' %}" alt ="Render of 2-Bedroom Unit" class="studio-pic">
+            <img src="{% static 'reservations/images/2 Bedrooms.png' %}" alt="Render of 2-Bedroom Unit" class="studio-pic">
             <p class="pic-desc">Render of 2-Bedroom Model Unit</p>
         {% endif %}
         <h1>{{ room.get_type_display }} - Floor {{ room.floor }}</h1>
@@ -254,7 +256,7 @@
                 <button type="submit">Reserve</button>
             </form>
             {% if error %}
-                <p style="color: red;">{{ error }}</p>
+                <p class="error-message">{{ error }}</p>
             {% endif %}
         {% else %}
             <h2>Please Log In or Register to Book This Room</h2>
@@ -267,13 +269,14 @@
 
     <script>
         window.addEventListener('scroll', function() {
-        var navbar = document.getElementById('navbar');
-        if (window.scrollY > 50) { // Adjust scroll value as needed
-            navbar.classList.add('sticky');
-        } else {
-            navbar.classList.remove('sticky');
-        }
+            var navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) { // Adjust scroll value as needed
+                navbar.classList.add('sticky');
+            } else {
+                navbar.classList.remove('sticky');
+            }
         });
+
         // Set minimum date for start date input
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('start_date').setAttribute('min', today);

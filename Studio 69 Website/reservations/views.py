@@ -3,9 +3,12 @@ from .models import Room, Booking
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Q
-from datetime import datetime
+from datetime import datetime, date
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.core.exceptions import ValidationError
+from django.utils.dateparse import parse_date
+from django.core.files.storage import FileSystemStorage
 
 def home(request):
     rooms = Room.objects.filter(is_booked=False)
@@ -99,15 +102,14 @@ def filter_rooms(request):
     })
 
 def room_availability(request):
-    available_rooms = Room.objects.filter(is_booked=False)
+    available_rooms = Room.objects.all()
 
-    # Get filters from request
     room_types = request.GET.getlist('room_types')
     floors = request.GET.get('floors', '').split(',')
     if floors == ['']:
         floors = []
 
-    # Ensure min_price and max_price are valid integers
+    #min and max price data validation as integer
     try:
         min_price = int(request.GET.get('min_price', 0))
     except ValueError:
@@ -121,7 +123,7 @@ def room_availability(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
-    # Apply filters
+    #filters
     if room_types:
         available_rooms = available_rooms.filter(type__in=room_types)
     if floors:
@@ -142,7 +144,7 @@ def room_availability(request):
 
             available_rooms = available_rooms.exclude(id__in=booked_rooms)
         except ValueError:
-            # Handle date parsing error
+            #date parsing error
             pass
 
     available_floors = [1, 2, 3, 4, 5]
@@ -185,14 +187,33 @@ def reserve_room(request, room_id):
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
 
-        # Convert start_date and end_date to datetime objects
-        start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+        # Validate input
+        try:
+            start_date_obj = parse_date(start_date)
+            end_date_obj = parse_date(end_date)
 
-        # Calculate number of nights
-        nights = (end_date_obj - start_date_obj).days
+            if not start_date_obj or not end_date_obj:
+                raise ValidationError('Invalid date format.')
 
-        if start_date_obj < end_date_obj:
+            if start_date_obj >= end_date_obj:
+                raise ValidationError('End date must be after the start date.')
+
+            nights = (end_date_obj - start_date_obj).days
+            if nights <= 0:
+                raise ValidationError('The number of nights must be positive.')
+
+            # Overlapping bookings
+            overlapping_bookings = Booking.objects.filter(
+                room=room,
+                start_date__lt=end_date_obj,
+                end_date__gt=start_date_obj,
+                is_canceled=False
+            )
+
+            if overlapping_bookings.exists():
+                raise ValidationError('This room is already booked for the selected dates.')
+
+            # Total price calculator
             total_price = room.price * nights
 
             # Create a booking
@@ -202,11 +223,11 @@ def reserve_room(request, room_id):
                 start_date=start_date_obj,
                 end_date=end_date_obj,
                 total_price=total_price,
-                is_canceled=False  # default value
+                is_canceled=False  # Default
             )
             booking.save()
 
-            # Mark the room as booked
+            # Mark room as booked
             room.is_booked = True
             room.save()
 
@@ -215,14 +236,15 @@ def reserve_room(request, room_id):
                 'start_date': start_date_obj,
                 'end_date': end_date_obj,
                 'total_price': total_price,
+                'nights': nights,  # Include nights in the context
             })
-        else:
+
+        except ValidationError as e:
             return render(request, 'reservations/room_detail.html', {
                 'room': room,
-                'error': 'End date must be after the start date.',
+                'error': str(e),
             })
-    return redirect('checkout', room_id=room_id)
-
+    return redirect('room_detail', room_id=room_id)
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -269,7 +291,7 @@ def checkout(request, room_id):
         'start_date': start_date,
         'end_date': end_date,
         'total_price': total_price,
-        'nights': nights,  # Ensure nights is passed to the template
+        'nights': nights,  #nights passed to template
     })
 
 def proceed_to_next_page(request):
@@ -282,11 +304,26 @@ def payment(request, room_id):
     total_price = 0
     nights = 0
 
+    #used to see start and end dates retrieved
+    print(f"Retrieved start_date: {start_date}")
+    print(f"Retrieved end_date: {end_date}")
+
     if start_date and end_date:
-        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-        nights = (end_date - start_date).days
-        total_price = room.price * nights if nights > 0 else 0
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            if start_date < end_date:
+                nights = (end_date - start_date).days
+                total_price = room.price * nights if nights > 0 else 0
+                print(f"Start Date: {start_date}, End Date: {end_date}, Nights: {nights}, Total Price: {total_price}")
+            else:
+                print("End date is before start date.")
+                total_price = 0
+                nights = 0
+        except ValueError:
+            print("Date conversion failed.")
+            total_price = 0
+            nights = 0
 
     return render(request, 'reservations/payment.html', {
         'room': room,
@@ -296,13 +333,17 @@ def payment(request, room_id):
         'nights': nights,
     })
 
-
 def upload_proof_of_payment(request, room_id):
-    if request.method == 'POST' and request.FILES.get('proof_of_payment'):
-        booking = get_object_or_404(Booking, room_id=room_id)
+    if request.method == 'POST':
+        proof_of_payment = request.FILES.get('proof_of_payment')
+
+        if not proof_of_payment:
+            return JsonResponse({'error': 'No file uploaded'}, status=400)
         
-        # Update the proof_of_payment field in the booking
-        booking.proof_of_payment = request.FILES['proof_of_payment']
+        booking = get_object_or_404(Booking, room_id=room_id)
+
+        # Update and upload proof of payment
+        booking.proof_of_payment = proof_of_payment
         booking.save()
         
         return JsonResponse({'message': 'Proof of payment uploaded successfully'}, status=200)
@@ -336,10 +377,10 @@ def building_overview(request):
 
 @login_required
 def reservation_history(request):
-    # Get the current logged-in user
+    #getting current logged-in user
     user = request.user
 
-    # Retrieve all bookings for the user
+    #all of user's bookings
     bookings = Booking.objects.filter(user=user).select_related('room')
 
     reservation_data = []
@@ -360,3 +401,6 @@ def reservation_history(request):
     return render(request, 'reservations/reservation_history.html', {
         'reservations': reservation_data
     })
+
+
+

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from datetime import date
 
 class Room(models.Model):
@@ -36,11 +37,11 @@ class Booking(models.Model):
 
     def save(self, *args, **kwargs):
         if self.start_date < date.today():
-            raise ValueError("Start date cannot be in the past.")
+            raise ValidationError("Start date cannot be in the past.")
         if self.end_date <= self.start_date:
-            raise ValueError("End date must be after the start date.")
+            raise ValidationError("End date must be after the start date.")
         if not self.is_canceled and not self.room.is_available(self.start_date, self.end_date):
-            raise ValueError("The room is not available for the selected dates.")
+            raise ValidationError("The room is not available for the selected dates.")
         super().save(*args, **kwargs)
 
     def __str__(self):
