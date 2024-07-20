@@ -30,6 +30,7 @@ class Booking(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField()
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
     is_canceled = models.BooleanField(default=False)
     proof_of_payment = models.ImageField(upload_to='proofs/', blank=True, null=True)  # Adjust as needed
 

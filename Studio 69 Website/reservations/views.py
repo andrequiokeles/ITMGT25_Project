@@ -184,7 +184,7 @@ def reserve_room(request, room_id):
     if request.method == 'POST':
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
-        
+
         # Convert start_date and end_date to datetime objects
         start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
@@ -194,6 +194,22 @@ def reserve_room(request, room_id):
 
         if start_date_obj < end_date_obj:
             total_price = room.price * nights
+
+            # Create a booking
+            booking = Booking(
+                user=request.user,
+                room=room,
+                start_date=start_date_obj,
+                end_date=end_date_obj,
+                total_price=total_price,
+                is_canceled=False  # default value
+            )
+            booking.save()
+
+            # Mark the room as booked
+            room.is_booked = True
+            room.save()
+
             return render(request, 'reservations/checkout.html', {
                 'room': room,
                 'start_date': start_date_obj,
@@ -331,7 +347,8 @@ def reservation_history(request):
         room = booking.room
         nights = (booking.end_date - booking.start_date).days
         reservation_data.append({
-            'room_number': room.number,
+            'id': booking.id,
+            'room_number': room.unit,
             'room_type': room.type,
             'room_floor': room.floor,
             'price': room.price,
@@ -343,16 +360,3 @@ def reservation_history(request):
     return render(request, 'reservations/reservation_history.html', {
         'reservations': reservation_data
     })
-
-@login_required
-def cancel_reservation(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
-
-    if request.method == 'POST':
-        booking.is_canceled = True
-        booking.room.is_booked = False
-        booking.room.save()
-        booking.save()
-        return redirect('reservation_history')
-
-    return render(request, 'reservations/confirm_cancel.html', {'booking': booking})

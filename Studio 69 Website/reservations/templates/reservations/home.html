@@ -4,7 +4,7 @@
 <head>
     <title>Studio 69</title>
     <style>
-        html, body{
+        html, body {
             margin: 0;
             height: 100%;
             text-overflow: clip;
@@ -12,13 +12,13 @@
         }
         body {
             font-family: Verdana, Geneva, Tahoma, sans-serif;
-            background-image: url('../static/reservations/images/bg_image.jpg');
+            background-image: url('{% static 'reservations/images/bg_image.jpg' %}');
             background-repeat: no-repeat;
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
-        .navbar{
+        .navbar {
             position: sticky;
             top: 0;
             z-index: 100;
@@ -26,12 +26,11 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.275);
             color: #ffffff;
         }
-        .navbar_logo{
+        .navbar_logo {
             width: 240px;
             height: auto;
             position: absolute;
             top: 5px;
-            
         }
         .navbar nav {
             justify-content: space-between;
@@ -53,13 +52,12 @@
             font-size: 20px;
             font-weight: bold;
             transition: background-color 0.3s ease;
-            
         }
         .navbar li:hover {
             border-bottom: 4px #ffffff solid;
             padding-bottom: 6px;
         }
-        .navbar a{
+        .navbar a {
             color: #ffffff;
             text-decoration: none;
         }
@@ -82,7 +80,7 @@
             transform: translateY(-2px);
             transition: transform 0.2s;
         }
-        .quote{
+        .quote {
             color: #ffffff;
             margin-left: 30px;
             margin-top: 0px;
@@ -92,7 +90,7 @@
             font-size: 50px;
             text-align: center;
         }
-        .book_button{
+        .book_button {
             margin-top: 15%;
             display: inline-block;
             margin-left: 30%;
@@ -108,21 +106,21 @@
             transform: translateY(0px);
             transition: transform 0.2s;
         }
-        .book_button:hover{
+        .book_button:hover {
             box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
             transform: translateY(-2px);
             transition: transform 0.2s;
             background-color: rgb(255, 216, 61);
         }
-        .book_button:active{
+        .book_button:active {
             transform: translateY(0px);
         }
-        .login_logo{
+        .login_logo {
             height: 30px;
             width: auto;
             padding: 5px;
         }
-        .login_text{
+        .login_text {
             color: #ffffff;
             text-decoration: none;
             font-size: 20px;
@@ -134,7 +132,7 @@
             align-items: center;
             display: flex;
         }
-        .profile{
+        .profile {
             position: relative;
             display: inline-block;
             position: fixed;
@@ -142,25 +140,25 @@
             top: 5px;
             border: none;
         }
-        .login_symbol{
-            height:50px;
+        .login_symbol {
+            height: 50px;
             width: auto;
         }
-        .profile:hover .login_symbol{
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        .profile:hover .login_symbol {
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
             border-radius: 20px;
         }
-        .profile_content{
+        .profile_content {
             display: none;
             position: absolute;
             background-color: #f1f1f1;
             min-width: 200px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
             z-index: 1;
             transform: translateX(-160px);
             border: none;
         }
-        .profile a{
+        .profile a {
             color: black;
             text-decoration: none;
             display: block;
@@ -168,28 +166,30 @@
             padding: 5px;
             margin: auto;
         }
-        .profile:hover .profile_content{
+        .profile:hover .profile_content {
             display: block;
             border: none;
         } 
-        .profile_content a:hover{
-            background-color: #ddd;;
+        .profile_content a:hover {
+            background-color: #ddd;
             text-decoration: none;
             border: none;
         }
-        .profile_content li:hover{
-            border-color: #f1f1f1;;
+        .profile_content li:hover {
+            border-color: #f1f1f1;
         }
     </style>
 </head>
 <body>
     <div class="navbar">
         <nav>
-            <a  href="{% url 'home' %}"><img class="navbar_logo" src="{% static 'reservations/images/Navbar_Logo.png' %}" alt="{% url 'home' %}"></a>
+            <a href="{% url 'home' %}"><img class="navbar_logo" src="{% static 'reservations/images/Navbar_Logo.png' %}" alt="Studio 69"></a>
             <ul>
                 <li><a href="{% url 'home' %}">Home</a></li>
                 <li><a href="{% url 'room_availability' %}">Available Rooms</a></li>
+                <li><a href="{% url 'building_overview' %}">Building Calendar</a></li> <!-- Link to building overview -->
                 {% if user.is_authenticated %}
+                <li><a href="{% url 'reservation_history' %}">Reservation History</a></li> <!-- Link to reservation history -->
                 <form action="{% url 'logout' %}" method="post" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="logout-button">Log Out</button>
@@ -201,17 +201,14 @@
                             <li><a href="{% url 'login' %}">Log In</a></li>
                             <li><a href="{% url 'register' %}">Create Account</a></li>
                         </div>
-                        
                     </div>
-                    
-                {% endif %}                
+                {% endif %}
             </ul>
         </nav>
     </div>
     <h1 class="quote">Your peaceful abode <br>in the busy city</h1>
     <div>
-        <a href="{% url 'room_availability' %}" class="book_button"> Book a Reservation!</a>   
+        <a href="{% url 'room_availability' %}" class="book_button">Book a Reservation!</a>
     </div>
-
 </body>
 </html>

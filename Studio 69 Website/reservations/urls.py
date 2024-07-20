@@ -19,7 +19,6 @@ urlpatterns = [
     path('next-page/', views.proceed_to_next_page, name='proceed_to_next_page'),
     path('building-overview/', views.building_overview, name='building_overview'),
     path('reservation-history/', views.reservation_history, name='reservation_history'),
-    path('cancel-reservation/<int:booking_id>/', views.cancel_reservation, name='cancel_reservation'),  
 ]
 
 if settings.DEBUG:
