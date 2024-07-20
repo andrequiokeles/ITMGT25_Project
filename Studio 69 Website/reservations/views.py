@@ -324,16 +324,17 @@ def building_overview(request):
 
 @login_required
 def reservation_history(request):
-    #getting current logged-in user
+    # Getting current logged-in user
     user = request.user
 
-    #all of user's bookings
+    # All of user's bookings
     bookings = Booking.objects.filter(user=user).select_related('room')
 
     reservation_data = []
     for booking in bookings:
         room = booking.room
         nights = (booking.end_date - booking.start_date).days
+        total_price = room.price * nights
         reservation_data.append({
             'id': booking.id,
             'room_number': room.unit,
@@ -343,11 +344,13 @@ def reservation_history(request):
             'nights': nights,
             'start_date': booking.start_date,
             'end_date': booking.end_date,
+            'total_price': total_price  
         })
 
     return render(request, 'reservations/reservation_history.html', {
         'reservations': reservation_data
     })
+
 
 
 

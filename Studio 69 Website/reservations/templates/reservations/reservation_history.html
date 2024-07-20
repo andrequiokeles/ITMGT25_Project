@@ -15,6 +15,7 @@
                 <th>Nights</th>
                 <th>Start Date</th>
                 <th>End Date</th>
+                <th>Total Price</th> 
                 <th>Status</th>
             </tr>
         </thead>
@@ -28,6 +29,7 @@
                     <td>{{ reservation.nights }}</td>
                     <td>{{ reservation.start_date }}</td>
                     <td>{{ reservation.end_date }}</td>
+                    <td>{{ reservation.total_price }}</td> 
                     <td>
                         {% if reservation.is_canceled %}
                             Canceled
